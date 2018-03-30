@@ -1,0 +1,124 @@
+- name: Install packages
+  apt: pkg={{ item }} state=installed
+  with_items:
+    - python-pip
+    - python-dev
+    - python-setuptools
+    - python-virtualenv
+    - git
+    - libyaml-dev
+    - libjpeg62-turbo-dev
+    - imagemagick
+    - libav-tools
+    - libv4l-dev
+    - cmake
+    - nginx
+
+- name: Create octoprint user
+  user:
+    name: octoprint
+    groups: dialout,tty
+    state: present
+    shell: "/bin/bash"
+    system: yes
+    createhome: yes
+
+- name: Create webcam user
+  user:
+    name: webcam
+    groups: video
+    state: present
+    shell: "/bin/bash"
+    system: yes
+    createhome: yes
+
+- name: Enable sudo for octoprint
+  template:
+    src: "020_octoprint"
+    dest: "/etc/sudoers.d/020_octoprint"
+    mode: 0440
+    owner: root
+    group: root
+    validate: "/usr/sbin/visudo -cf %s"
+
+- name: Checkout mjpeg streamer
+  git:
+    repo: 'https://github.com/jacksonliam/mjpg-streamer.git'
+    dest: /home/webcam/mjpg-streamer
+    update: no
+  become_user: webcam
+
+- name: Compile mjpeg streamer
+  command: make
+  args:
+    chdir: /home/webcam/mjpg-streamer/mjpg-streamer-experimental
+    creates: /home/webcam/mjpg-streamer/mjpg-streamer-experimental/mjpg_streamer
+  become_user: webcam
+
+- name: Add systemd config for mjpeg streamer
+  template:
+    src: "mjpeg-streamer.service.j2"
+    dest: "/etc/systemd/system/mjpeg-streamer-{{ item.name }}.service"
+    owner: root
+    group: root
+    mode: "u=rw,g=r,o=r"
+  with_items: "{{ webcams }}"
+  notify: Restart webcam
+
+- name: Ensure mjpeg streamer is running and enabled.
+  service:
+    name: mjpeg-streamer-{{ item.name }}
+    state: started
+    enabled: yes
+  with_items: "{{ webcams }}"
+
+- name: Checkout octoprint
+  git:
+    repo: 'https://github.com/foosel/OctoPrint.git'
+    dest: /home/octoprint/octoprint
+    update: no
+    version: "{{ octoprint_version }}"
+  become_user: octoprint
+
+- name: Create octoprint virtualenv
+  command: virtualenv -p /usr/bin/python2 venv
+  args:
+    chdir: /home/octoprint/octoprint
+    creates: /home/octoprint/octoprint/venv
+  become_user: octoprint
+
+- name: Install octoprint deps
+  command: ./venv/bin/python setup.py install
+  args:
+    chdir: /home/octoprint/octoprint
+    creates: /home/octoprint/octoprint/venv/bin/octoprint
+  become_user: octoprint
+
+- name: Create configuration dirs
+  file:
+    path: /home/octoprint/.{{ item.name }}
+    state: directory
+    mode: 0755
+    owner: octoprint
+    group: octoprint
+  with_items: "{{ octoprint_instances }}"
+
+- name: Add systemd config for octoprint
+  template:
+    src: "octoprint.service.j2"
+    dest: "/etc/systemd/system/octoprint-{{ item.name }}.service"
+    owner: root
+    group: root
+    mode: "u=rw,g=r,o=r"
+  with_items: "{{ octoprint_instances }}"
+  notify: Restart octoprint
+
+- name: Ensure octoprint instances is running and enabled.
+  service:
+    name: octoprint-{{ item.name }}
+    state: started
+    enabled: yes
+  with_items: "{{ octoprint_instances }}"
+
+- import_tasks: nginx.yml
+  tags: [ 'nginx' ]

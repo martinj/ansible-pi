@@ -1,0 +1,20 @@
+---
+- name: Restart webcam
+  service:
+    name: mjpeg-streamer-{{ item.name }}
+    state: restarted
+    enabled: yes
+  with_items: "{{ webcams }}"
+
+- name: Restart octoprint
+  service:
+    name: octoprint-{{ item.name }}
+    state: restarted
+    enabled: yes
+  with_items: "{{ octoprint_instances }}"
+
+- name: Restart nginx
+  service:
+    name: nginx
+    state: restarted
+    enabled: yes

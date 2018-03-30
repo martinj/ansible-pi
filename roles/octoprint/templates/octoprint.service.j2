@@ -1,0 +1,10 @@
+[Unit]
+	Description=OctoPrint service
+
+[Service]
+	User=octoprint
+	ExecStart=/home/octoprint/octoprint/venv/bin/octoprint serve --basedir .{{ item.name }} --port {{ item.port }}
+	WorkingDirectory=/home/octoprint
+
+[Install]
+	WantedBy=multi-user.target

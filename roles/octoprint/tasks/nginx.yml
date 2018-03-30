@@ -1,0 +1,28 @@
+---
+- name: Add nginx gzip config
+  template:
+    src: "nginx-gzip.conf"
+    dest: "/etc/nginx/conf.d/gzip.conf"
+    owner: root
+    group: root
+    mode: "u=rw,g=r,o=r"
+  notify: Restart nginx
+
+- name: Add nginx octoprint site
+  template:
+    src: "nginx-00_octoprint.conf"
+    dest: "/etc/nginx/sites-available/00_octoprint.conf"
+    owner: root
+    group: root
+    mode: "u=rw,g=r,o=r"
+  notify: Restart nginx
+
+- file:
+    path: "/etc/nginx/sites-enabled/default"
+    state: absent
+
+- file:
+    src: "/etc/nginx/sites-available/00_octoprint.conf"
+    dest: "/etc/nginx/sites-enabled/00_octoprint.conf"
+    state: link
+

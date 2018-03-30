@@ -1,0 +1,11 @@
+[Unit]
+	Description=MJPG Streamer Service
+
+[Service]
+	User=webcam
+	Environment=LD_LIBRARY_PATH=.
+	ExecStart=/home/webcam/mjpg-streamer/mjpg-streamer-experimental/mjpg_streamer -i "{{ item.options }}" -o "output_http.so -p {{ item.port }} -w ./www-{{ item.name }}"
+	WorkingDirectory=/home/webcam/mjpg-streamer/mjpg-streamer-experimental
+
+[Install]
+	WantedBy=multi-user.target

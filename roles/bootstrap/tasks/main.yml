@@ -1,0 +1,65 @@
+---
+- name: Update apt packages
+  apt:
+    update_cache=yes
+
+- name: Upgrade apt packages
+  apt:
+    upgrade=dist
+
+- name: Install default packages
+  apt: pkg={{ item }} state=installed
+  with_items:
+
+    # Basics
+    - build-essential
+    - curl
+    - git
+    - nano
+    - apt-transport-https
+
+    # Various debugging tools
+    - htop
+
+- name: Set the hostname
+  command: hostnamectl set-hostname "{{ hostname }}"
+
+- name: Update /etc/hosts
+  replace:
+    path: /etc/hosts
+    regexp: '(\s+)raspberrypi(\s+.*)?$'
+    replace: '\1{{ hostname }}\2'
+    backup: yes
+
+- name: Configure option values in /etc/locale.gen file.
+  lineinfile:
+    dest: /etc/locale.gen
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    insertafter: EOF
+    state: present
+  with_items: "{{ locale_options }}"
+
+- name: Generate Locale
+  command: locale-gen {{ locale }}
+
+- name: Set Locale
+  command: update-locale LC_ALL={{ locale }} LANG={{ locale }}
+
+- name: set /etc/timezone
+  template: src=timezone.j2 dest=/etc/timezone
+
+- name: Create ~/.ssh dir for {{ username }}
+  file:
+    path: /home/{{ username }}/.ssh
+    state: directory
+    mode: 0755
+
+- name: Add ssh key
+  copy:
+    src: "{{ ssh_key }}"
+    dest: /home/{{ username }}/.ssh/authorized_keys
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: 0600
+  when: not development

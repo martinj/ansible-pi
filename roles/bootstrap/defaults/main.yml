@@ -1,0 +1,11 @@
+username: "pi"
+ssh_key: ~/.ssh/id_rsa_github.pub
+locale: "en_US.UTF-8"
+timezone: Europe/Stockholm
+locale_options:
+  # Disable Default (GB) Locale
+  - regexp: "^#?en_GB.UTF-8 UTF-8"
+    line: "# en_GB.UTF-8 UTF-8"
+  # Enable US Locale
+  - regexp: "^#?en_US.UTF-8 UTF-8"
+    line: "en_US.UTF-8 UTF-8"

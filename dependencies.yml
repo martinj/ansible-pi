@@ -1,0 +1,3 @@
+---
+- src: franklinkim.ufw
+  version: 1.7.1

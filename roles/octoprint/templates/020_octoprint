@@ -1,0 +1,4 @@
+Cmnd_Alias SHUTDOWN_CMDS = /sbin/poweroff, /sbin/reboot
+Cmnd_Alias SUPERVISOR_COMMANDS = /usr/bin/supervisorctl
+
+octoprint ALL=(ALL) NOPASSWD: SHUTDOWN_CMDS, SUPERVISOR_COMMANDS

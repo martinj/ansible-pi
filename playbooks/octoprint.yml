@@ -1,0 +1,28 @@
+# ansible-playbook -k playbooks/octoprint.yml
+---
+- hosts: octopi2
+  remote_user: pi
+  become: true
+  gather_facts: yes
+  vars:
+    hostname: "octo2"
+    development: false
+    octoprint_instances:
+      - { name: 'fb2020', port: 5000 }
+      - { name: 'ender2', port: 5001 }
+    webcams:
+      - { name: 'fb2020', options: 'input_uvc.so -r 1280x720 -f 30 -d /dev/video0', port: 8080 }
+
+  roles:
+    - role: ../roles/bootstrap
+      tags: [ 'bootstrap' ]
+
+    - role: ../roles/octoprint
+      tags: [ 'octoprint' ]
+
+    - role: franklinkim.ufw
+      ufw_rules:
+        - port: 22
+          rule: allow
+        - port: 80
+          rule: allow
