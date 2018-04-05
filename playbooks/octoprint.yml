@@ -6,12 +6,17 @@
   gather_facts: yes
   vars:
     hostname: "octo2"
+    wifi_reconnect_gateway: '192.168.1.1.'
     development: false
     octoprint_instances:
       - { name: 'fb2020', port: 5000 }
       - { name: 'ender2', port: 5001 }
     webcams:
       - { name: 'fb2020', options: 'input_uvc.so -r 1280x720 -f 30 -d /dev/video0', port: 8080 }
+    octostart:
+      -  { name: 'CR10', url: 'http://octopi.local', webcam: 'http://octopi.local/webcam/?action=stream' }
+      -  { name: 'FB2020', url: 'http://octo2.local/fb2020', webcam: 'http://octo2.local/webcam/fb2020?action=stream' }
+      -  { name: 'ender2', url: 'http://octo2.local/ender2', webcam: false }
 
   roles:
     - role: ../roles/bootstrap

@@ -4,6 +4,7 @@ Vagrant.require_version '>= 1.8.0'
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   playbook = "#{ENV['PLAYBOOK']}"
+  tags = "#{ENV['TAGS']}"
 
   if playbook.empty?
     playbook = "unknown"
@@ -38,8 +39,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.provision "playbook", type: "ansible" do |ansible|
     ansible.verbose = "vv"
     ansible.playbook = "#{playbook}"
+    if not tags.empty?
+      ansible.tags = "#{tags}"
+    end
     #ansible.vault_password_file = ".vault_pass"
-    ansible.remote_user = "vagrant"
+    # ansible.remote_user = "vagrant"
     ansible.extra_vars = {
       development: true,
       username: "vagrant"

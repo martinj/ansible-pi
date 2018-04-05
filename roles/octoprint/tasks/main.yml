@@ -13,6 +13,7 @@
     - libv4l-dev
     - cmake
     - nginx
+    - avrdude
 
 - name: Create octoprint user
   user:

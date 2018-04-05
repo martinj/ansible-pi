@@ -26,3 +26,10 @@
     dest: "/etc/nginx/sites-enabled/00_octoprint.conf"
     state: link
 
+- name: Add octostart page
+  template:
+    src: "octostart.html.j2"
+    dest: "/var/www/html/index.html"
+    owner: root
+    group: root
+    mode: "u=rw,g=r,o=r"

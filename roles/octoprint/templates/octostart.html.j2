@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Octostart</title>
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+  </head>
+
+  <body>
+
+    <main role="main">
+
+      <div class="album py-5 bg-light">
+        <div class="container">
+
+          <div id="printerRow" class="row">
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+
+    <footer class="text-muted">
+      <div class="container">
+        <p><a href="https://www.github.com/martinj/octostart">octostart</a></p>
+      </div>
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.21.0/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script>
+      const printers = {{ octostart|to_json }};
+
+      function addPrinter(printer) {
+        const tmpl = `
+          <div id="${printer.name}" class="col-md-6">
+            <a href="${printer.url}" class="card-link" style="color: black">
+              <div class="card mb-4 box-shadow">
+                <img class="card-img-top" src="${printer.webcam || 'http://via.placeholder.com/1280x720'}">
+                <div class="card-body">
+                  <h5 class="card-title">${printer.name}</h5>
+                  <div class="printerBody">
+                    ${printerBody({})}
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+        `;
+
+        $('#printerRow').append(tmpl);
+      }
+
+      function printerBody({name, state, temps, progress}) {
+        const temp = temps ? temps[0] : false;
+        let progressMsg = '-';
+
+        if (progress && progress.completion) {
+          if (progress.completion === 100) {
+            progressMsg = 'DONE!';
+          } else {
+            progressMsg = `${Math.round(progress.completion)}%, ETA ${moment.duration(progress.printTimeLeft, 'seconds').humanize()}`;
+          }
+        }
+
+        return `
+          <strong>State:</strong> <span class="printerState">
+            ${state && state.text ? state.text : '-'}
+          </span><br>
+          <strong>Extruder:</strong> <span class="printerETemp">
+            ${temp ? `${temp.tool0.actual}°/${temp.tool0.target}°` : '-°/-°'}
+          </span><br>
+          <strong>Bed:</strong> <span class="printerBTemp">
+            ${temp ? `${temp.bed.actual}°/${temp.bed.target}°` : '-°/-°'}
+          </span><br>
+          <strong>Progress:</strong> <span class="printerTimeLeft">
+            ${progressMsg}
+          </span>
+        `;
+      }
+
+      function connect(printer) {
+        const sock = new SockJS(`${printer.url}/sockjs`);
+        sock.onopen = () => {
+          console.log(`Connected to ${printer.name}`);
+        }
+
+        sock.onmessage = (e) => {
+          const obj = e.data.history || e.data.current;
+          if (!obj) {
+            return;
+          }
+
+          $(`#${printer.name} .printerBody`).html(printerBody(obj));
+        }
+
+        sock.onclose = () => {
+          console.log(`Disconnected from ${printer.name}`);
+        }
+      }
+      $(document).ready(() => {
+          printers.forEach((printer) => {
+            addPrinter(printer);
+            connect(printer);
+          });
+      });
+    </script>
+  </body>
+</html>

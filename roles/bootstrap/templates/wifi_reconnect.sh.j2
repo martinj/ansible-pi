@@ -1,0 +1,10 @@
+#!/bin/bash
+
+ping -c2 {{ wifi_reconnect_gateway }} > /dev/null
+
+if [ $? != 0 ]; then
+    ifdown --force wlan0
+    sleep 5
+    ifup wlan0
+    echo "wlan0 reconnected at `date`"
+fi

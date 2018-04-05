@@ -63,3 +63,17 @@
     group: "{{ username }}"
     mode: 0600
   when: not development
+
+- name: Add wifi reconnect script
+  template:
+    src: wifi_reconnect.sh.j2
+    dest: /usr/local/bin/wifi_reconnect.sh
+    mode: u=rwx,g=rx,o=rx
+  when: wifi_reconnect_gateway is defined
+
+- name: Add wifi reconnect script to crontab
+  cron:
+    name: "Check wifi connection"
+    job: "/usr/local/bin/wifi_reconnect.sh"
+    minute: 10
+  when: wifi_reconnect_gateway is defined
