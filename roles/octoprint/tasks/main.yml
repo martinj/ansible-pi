@@ -15,6 +15,16 @@
     - nginx
     - avrdude
 
+- name: Add usb rules
+  template:
+    src: "99-usb.rules.j2"
+    dest: "/etc/udev/rules.d/99-usb.rules"
+    owner: root
+    group: root
+    mode: "u=rw,g=r,o=r"
+  when: usb_rules is defined
+  notify: Reload udev rules
+
 - name: Create octoprint user
   user:
     name: octoprint

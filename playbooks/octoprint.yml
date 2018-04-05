@@ -12,11 +12,15 @@
       - { name: 'fb2020', port: 5000 }
       - { name: 'ender2', port: 5001 }
     webcams:
-      - { name: 'fb2020', options: 'input_uvc.so -r 1280x720 -f 30 -d /dev/video0', port: 8080 }
+      - { name: 'fb2020', options: 'input_uvc.so -r 1280x720 -f 30 -d /dev/videoFB2020', port: 8080 }
     octostart:
-      -  { name: 'CR10', url: 'http://octopi.local', webcam: 'http://octopi.local/webcam/?action=stream' }
-      -  { name: 'FB2020', url: 'http://octo2.local/fb2020', webcam: 'http://octo2.local/webcam/fb2020?action=stream' }
-      -  { name: 'ender2', url: 'http://octo2.local/ender2', webcam: false }
+      - { name: 'CR10', url: 'http://octopi.local', webcam: 'http://octopi.local/webcam/?action=stream' }
+      - { name: 'FB2020', url: 'http://octo2.local/fb2020', webcam: 'http://octo2.local/webcam/fb2020?action=stream' }
+      - { name: 'ender2', url: 'http://octo2.local/ender2', webcam: false }
+    usb_rules:
+      - { subsystem: 'tty', rule: 'ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001"', symlink: 'ttyEnder2' }
+      - { subsystem: 'tty', rule: 'ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523"', symlink: 'ttyFB2020' }
+      - { subsystem: 'video4linux', rule: 'ATTRS{idProduct}=="0825", ATTRS{idVendor}=="046d"', symlink: 'videoFB2020' }
 
   roles:
     - role: ../roles/bootstrap
