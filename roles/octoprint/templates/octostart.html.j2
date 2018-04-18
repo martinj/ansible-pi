@@ -100,7 +100,7 @@
 
         sock.onmessage = (e) => {
           const obj = e.data.history || e.data.current;
-          if (!obj) {
+          if (!obj || !obj.temps || !obj.temps.length) {
             return;
           }
 

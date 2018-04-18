@@ -1,0 +1,3 @@
+{% for rule in usb_rules %}
+SUBSYSTEM=="{{ rule.subsystem }}", {{ rule.rule }}, SYMLINK+="{{ rule.symlink }}"
+{% endfor %}

@@ -17,8 +17,8 @@ Ansible playbooks for my Pi's
 
 	 ansible-playbook playbooks/octoprint.yml --tags "octoprint"
 
-	 # run on vagrant
+	# run on vagrant
 
-	 PLAYBOOK=playbooks/octoprint.yml vagrant provision
+	 PLAYBOOK=playbooks/octoprint.yml vagrant up
 
-	 TAGS=octoprint PLAYBOOK=playbooks/octoprint.yml vagrant provision
+	 TAGS=octoprint PLAYBOOK=playbooks/octoprint.yml vagrant up

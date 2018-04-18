@@ -13,6 +13,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.hostname = "test"
 
   config.vm.box = "debian/stretch64"
+  config.vm.network "forwarded_port", guest: 80, host: 9000
+  config.vm.network "forwarded_port", guest: 443, host: 9001
 
   config.vm.provider "virtualbox" do |v|
     # Give it more juice
@@ -46,7 +48,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # ansible.remote_user = "vagrant"
     ansible.extra_vars = {
       development: true,
-      username: "vagrant"
+      username: "vagrant",
+      variable_host: "all"
     }
   end
 end
