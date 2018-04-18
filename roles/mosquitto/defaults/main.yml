@@ -1,0 +1,3 @@
+mosquitto_passwd_file: /etc/mosquitto/passwd
+mosquitto_username: mosquitto
+mosquitto_password: mosquitto

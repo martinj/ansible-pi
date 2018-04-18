@@ -1,0 +1,54 @@
+---
+- apt_key: url=https://deb.nodesource.com/gpgkey/nodesource.gpg.key state=present
+
+- apt_repository:
+    repo: deb https://deb.nodesource.com/node_8.x stretch main
+    state: present
+
+- apt_repository:
+    repo: deb-src https://deb.nodesource.com/node_8.x stretch main
+    state: present
+
+- apt: name='nodejs' state='present' update_cache='yes'
+
+# can't use npm module here because we need to install this with --unsafe-perm flag
+- name: Install Node-Red
+  raw: if ! npm ls -g node-red; then npm install -g --unsafe-perm node-red; fi
+
+- include_tasks: pm2.yml
+
+- name: Create Node Red home dir
+  file:
+    path: "{{ node_red_dir }}"
+    owner: "{{ pm2_user }}"
+    group: "{{ pm2_group }}"
+    state: directory
+
+- name: Copy node-red pm2 config
+  template:
+    src: node-red-pm2.json.j2
+    dest: "{{ node_red_dir }}/node-red-pm2.json"
+    owner: "{{ pm2_user }}"
+    group: "{{ pm2_group }}"
+    mode: 0644
+  register: node_red_config
+
+- name: Copy node-red config
+  template:
+    src: settings.js
+    dest: "{{ node_red_dir }}/settings.js"
+    owner: "{{ pm2_user }}"
+    group: "{{ pm2_group }}"
+    mode: 0640
+  register: node_red_config
+
+- name: Start Node-Red
+  raw: pm2 reload {{ node_red_dir }}/node-red-pm2.json
+  become_user: pm2
+  when: node_red_config.changed
+
+- name: Save pm2 state
+  raw: pm2 save
+  become_user: pm2
+  when: node_red_config.changed
+

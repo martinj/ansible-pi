@@ -1,0 +1,41 @@
+---
+- hosts: "{{ variable_host | default('iot') }}"
+  remote_user: pi
+  become: true
+  gather_facts: yes
+  vars:
+    hostname: "{{ ansible_hostname }}"
+    development: false
+
+  vars_files:
+     - ../vars/iot.yml
+
+  tasks:
+    - debug:
+        msg: "{{ hass_config_glob }}"
+
+  roles:
+    - role: ../roles/bootstrap
+      tags: [ 'bootstrap' ]
+
+    - role: ../roles/hass
+      tags: [ 'hass' ]
+
+    - role: ../roles/node-red
+      tags: [ 'node-red' ]
+
+    - role: ../roles/mosquitto
+      tags: [ 'mosquitto' ]
+
+    - role: ../roles/iot-nginx
+      tags: [ 'nginx' ]
+
+    - role: franklinkim.ufw
+      ufw_rules:
+        - port: 22
+          rule: allow
+        - port: 80
+          rule: allow
+        - port: 443
+          rule: allow
+

@@ -1,0 +1,7 @@
+---
+pm2_version: "latest"
+pm2_user: pm2
+pm2_home: /home/pm2
+pm2_group: pm2
+
+node_red_dir: /srv/node-red

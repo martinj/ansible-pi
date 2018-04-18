@@ -1,0 +1,40 @@
+---
+- name: Install pm2
+  npm:
+    name: pm2
+    version: "{{ pm2_version }}"
+    global: yes
+    state: present
+
+- name: Create {{ pm2_group }} group
+  group:
+    name: "{{ pm2_group }}"
+    state: present
+
+- name: Create {{ pm2_user }} user
+  user:
+    name: "{{ pm2_user }}"
+    group: "{{ pm2_group }}"
+    groups: "{{ pm2_group }}"
+    state: present
+    shell: "/bin/bash"
+    system: yes
+    createhome: no
+
+- name: Create pm2 home dir
+  file:
+    path: "{{ pm2_home }}"
+    owner: "{{ pm2_user }}"
+    group: "{{ pm2_group }}"
+    state: directory
+
+- name: Autostart pm2
+  command: "pm2 startup systemd -u {{ pm2_user }} --hp {{ pm2_home }}"
+  args:
+    creates: /etc/systemd/system/pm2-pm2.service
+
+- name: Ensure pm2 is running and enabled.
+  service:
+    name: pm2-pm2
+    state: started
+    enabled: yes
