@@ -1,6 +1,6 @@
 ---
 - name: Install mosquitto
-  apt: pkg=mosquitto state=installed
+  apt: pkg=mosquitto state=present
 
 - name: Create mosquitto passwd file
   copy:
@@ -9,7 +9,7 @@
     force: no
     owner: mosquitto
     group: mosquitto
-    mode: "u=rw,g=r"
+    mode: "u=rw,g=r,o="
   register: mosquitto_pass_file
 
 - name: Add mosquitto user
@@ -22,7 +22,7 @@
     dest: "/etc/mosquitto/conf.d/mosquitto.conf"
     owner: mosquitto
     group: mosquitto
-    mode: "u=rw,g=r"
+    mode: "u=rw,g=r,o="
 
 - name: Ensure mosquitto is running and enabled.
   service:

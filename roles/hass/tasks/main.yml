@@ -1,6 +1,6 @@
 ---
 - name: Install required Python modules
-  apt: pkg={{ item }} state=installed
+  apt: pkg={{ item }} state=present
   with_items:
     - python3
     - python3-venv
@@ -63,7 +63,7 @@
     dest: /home/homeassistant/.homeassistant/{{ item | basename }}
     owner: homeassistant
     group: homeassistant
-    mode: "u=rw,g=r"
+    mode: "u=rw,g=r,o="
   notify: Restart homeassistant
   with_fileglob:
     - "{{ hass_config_glob }}"
