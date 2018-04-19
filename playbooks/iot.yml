@@ -10,10 +10,6 @@
   vars_files:
      - ../vars/iot.yml
 
-  tasks:
-    - debug:
-        msg: "{{ hass_config_glob }}"
-
   roles:
     - role: ../roles/bootstrap
       tags: [ 'bootstrap' ]
@@ -27,8 +23,47 @@
     - role: ../roles/mosquitto
       tags: [ 'mosquitto' ]
 
+    - role: ../roles/influxdb
+      tags: [ 'influxdb' ]
+
+    - role: ../roles/grafana
+      tags: [ 'grafana' ]
+
     - role: ../roles/iot-nginx
       tags: [ 'nginx' ]
+
+    - role: ../roles/dnspark
+      tags: [ 'dnspark' ]
+
+    - role: dj-wasabi.telegraf
+      telegraf_agent_version: 1.5.3
+      telegraf_agent_interval: 30
+      telegraf_agent_round_interval: true
+      telegraf_agent_flush_interval: 70
+      telegraf_agent_flush_jitter: 15
+      telegraf_agent_hostname: ""
+      telegraf_agent_output:
+        - type: influxdb
+          config:
+            - urls = ["http://localhost:8086"]
+            - database = "telegraf"
+            - username = "{{ telegraf_username }}"
+            - password = "{{ telegraf_password }}"
+      telegraf_plugins_default:
+        - plugin: nginx
+          config:
+            - urls = ["http://127.0.0.1/stats"]
+        - plugin: cpu
+          config:
+            - totalcpu = true
+        - plugin: disk
+        - plugin: io
+        - plugin: mem
+        - plugin: system
+        - plugin: swap
+        - plugin: net
+        - plugin: processes
+      tags: [ 'telegraf' ]
 
     - role: franklinkim.ufw
       ufw_rules:
@@ -38,4 +73,6 @@
           rule: allow
         - port: 443
           rule: allow
-
+        - port: 8086
+          from_ip: "{{ local_cidr }}"
+      tags: [ 'ufw' ]

@@ -1,0 +1,26 @@
+---
+- apt_key: url=https://packagecloud.io/gpg.key state=present
+
+- apt_repository:
+    repo: deb https://packagecloud.io/grafana/stable/debian/ stretch main
+    state: present
+
+- name: Install grafana
+  apt: name='grafana' state='present' update_cache='yes'
+
+- name: Add grafana config
+  template:
+    src: "{{ grafana_config }}"
+    dest: /etc/grafana/grafana.ini
+    owner: grafana
+    group: grafana
+    mode: "u=rw,g=r,o="
+  notify: Restart grafana
+  when: grafana_config is defined
+
+- name: Ensure grafana is running and enabled.
+  service:
+    name: grafana-server
+    state: started
+    enabled: yes
+

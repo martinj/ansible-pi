@@ -1,0 +1,15 @@
+---
+- name: Add dnspark script
+  template:
+    src: update_dnspark.sh
+    dest: /usr/local/sbin/update_dnspark.sh
+    owner: root
+    group: root
+    mode: "u=rwx,g=rwx,o="
+
+- name: Add dnspark script to crontab
+  cron:
+    name: "Update ip with dnspark"
+    job: "/usr/local/sbin/update_dnspark.sh"
+    minute: 30
+  when: not development
