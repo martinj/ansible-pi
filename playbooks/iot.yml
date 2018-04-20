@@ -4,7 +4,7 @@
   become: true
   gather_facts: yes
   vars:
-    hostname: "{{ ansible_hostname }}"
+    hostname: "{{ variable_host | default('iot') }}"
     development: false
 
   vars_files:
@@ -32,8 +32,8 @@
     - role: ../roles/iot-nginx
       tags: [ 'nginx' ]
 
-    - role: ../roles/dnspark
-      tags: [ 'dnspark' ]
+    - role: ../roles/aws-dyndns
+      tags: [ 'aws-dyndns' ]
 
     - role: dj-wasabi.telegraf
       telegraf_agent_version: 1.5.3
@@ -73,6 +73,8 @@
           rule: allow
         - port: 443
           rule: allow
-        - port: 8086
+        - port: 8086 # influxdb
+          from_ip: "{{ local_cidr }}"
+        - port: 1883 # mqtt
           from_ip: "{{ local_cidr }}"
       tags: [ 'ufw' ]

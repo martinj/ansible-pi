@@ -1,0 +1,25 @@
+---
+- name: Install packages
+  apt: pkg={{ item }} state=present
+  with_items:
+    - python-pip
+
+- name: Install Pip packages
+  pip: name={{ item }}
+  with_items:
+    - boto
+
+- name: Add AWS dyndns script
+  template:
+    src: aws-dns-update.py
+    dest: /usr/local/bin/aws-dns-update.py
+    owner: root
+    group: root
+    mode: "u=rwx,g=rwx,o="
+
+- name: Add AWS dyndns script to crontab
+  cron:
+    name: "Update ip with AWS Route53"
+    job: "AWS_ACCESS_KEY={{ aws_dyndns_access_key }} AWS_SECRET_KEY={{ aws_dyndns_secrect_key }} /usr/local/sbin/update_dnspark.sh -d {{ aws_dyndns_domain }} -s {{ aws_dyndns_subdomain }} -z {{ aws_dyndns_zone }} -t {{ aws_dyndns_ttl }}"
+    minute: 30
+  when: not development
