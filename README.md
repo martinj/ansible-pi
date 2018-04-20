@@ -22,3 +22,7 @@ Ansible playbooks for my Pi's
 	 PLAYBOOK=playbooks/octoprint.yml vagrant up
 
 	 TAGS=octoprint PLAYBOOK=playbooks/octoprint.yml vagrant up
+
+## IOT Playbook
+
+If it fails on ufw do a reboot. The updates runned by bootstrap role may have changed the kernel.

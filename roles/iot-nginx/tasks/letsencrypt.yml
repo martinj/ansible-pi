@@ -21,3 +21,16 @@
     special_time: weekly
     job: letsencrypt --renew certonly -n --webroot -w /var/www/letsencrypt -m {{ letsencrypt_email }} --agree-tos -d {{ domain_name }} && service nginx reload
 
+- name: Add nginx https site
+  template:
+    src: "nginx-01_https.conf"
+    dest: "/etc/nginx/sites-available/01_https.conf"
+    owner: root
+    group: root
+    mode: "u=rw,g=r,o=r"
+  notify: Restart nginx
+
+- file:
+    src: "/etc/nginx/sites-available/01_https.conf"
+    dest: "/etc/nginx/sites-enabled/01_https.conf"
+    state: link
